@@ -16,10 +16,20 @@
 // bounty write-ups and "read later" pages. It hints at that life without a
 // word of explanation. Deterministic: the same fixed string on every run.
 // Exactly 3 bytes, no trailing newline, inside the gate's 1-5 characters.
-import { mkdirSync, writeFileSync } from "node:fs";
+// Self-check the gate before writing: the entry must be 1-5 ASCII digits,
+// nothing else — fail loudly in the sandbox rather than ship a bad file.
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 const COUNT = "137";
 
+if (!/^[0-9]{1,5}$/.test(COUNT)) {
+  throw new Error(`Invalid tab count for the gate: ${JSON.stringify(COUNT)}`);
+}
+
 mkdirSync("/output", { recursive: true });
 writeFileSync("/output/entry.txt", COUNT, "utf8");
+const written = readFileSync("/output/entry.txt", "utf8");
+if (written !== COUNT) {
+  throw new Error("Wrote entry.txt but its bytes do not match the count");
+}
 console.log(`Wrote ${COUNT.length} chars to /output/entry.txt`);
